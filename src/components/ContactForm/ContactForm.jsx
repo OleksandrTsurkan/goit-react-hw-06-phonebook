@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ButtonSend, Form, Input, Labelcontact } from './ContactForm.styled';
+import { useDispatch, useSelector } from 'react-redux';
+import { nanoid } from '@reduxjs/toolkit';
+import { addContact, getphoneBooksValue } from 'redux/contactSlice';
 
-export const CreateContact = ({ onSubmit }) => {
+export const CreateContact = () => {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+
+  const dispatch = useDispatch();
+  const phoneBook = useSelector(getphoneBooksValue);
 
   const handleChange = ({ target: { value, name } }) => {
     if (name === 'name') setName(value);
@@ -11,13 +17,29 @@ export const CreateContact = ({ onSubmit }) => {
   };
   const handleSubmit = e => {
     e.preventDefault();
-    onSubmit({ name, number });
+    const data = { name, number };
+    const newContact = { ...data, id: nanoid() };
+
+    if (inNameNew(phoneBook, newContact) !== undefined) {
+      return alert(`${newContact.name}is already in contacts.`);
+    }
+
+    dispatch(addContact(newContact));
+
     reset();
   };
+
+  const inNameNew = (phoneBook, newContact) => {
+    return phoneBook.find(
+      ({ name }) => name.toLowerCase() === newContact.name.toLowerCase()
+    );
+  };
+
   const reset = () => {
     setName('');
     setNumber('');
   };
+
   return (
     <>
       <h2>Phonebook</h2>
